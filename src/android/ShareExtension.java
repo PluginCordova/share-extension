@@ -35,7 +35,23 @@ public class ShareExtension extends CordovaPlugin {
 	@Override
 	public boolean execute(final String action, final JSONArray data,
 			final CallbackContext callbackContext) throws JSONException {
-    if (action.equals("getShareData")) {
+		if (action.equals("getDeepLink")) {
+			SharedPreferences settings = cordova.getActivity().getSharedPreferences("org.hotshare.everywhere.deeplink", 0);
+			String link = settings.getString("deeplink", null);
+			Log.i("##RDBG", "getDeepLink link: " + link);
+			if (link != null && link.length() > 0) {
+				JSONObject response = new JSONObject();
+	      try {
+	        response.put("deeplink", link);
+	      } catch (JSONException e) {
+	        Log.e("##RDBG", e.getMessage());
+	      }
+	      callbackContext.success(response);
+			}
+
+			return true;
+		}
+    else if (action.equals("getShareData")) {
 			SharedPreferences settings = cordova.getActivity().getSharedPreferences("org.hotshare.everywhere.sysshare", 0);
 			String type = settings.getString("shareType", null);
       String content = settings.getString("shareContent", null);
@@ -59,6 +75,14 @@ public class ShareExtension extends CordovaPlugin {
 			SharedPreferences.Editor editor = settings.edit();
 			editor.putString("shareType", null);
 			editor.putString("shareContent", null);
+			editor.commit();
+			callbackContext.success("success");
+			return true;
+    }
+		else if (action.equals("emptyDeepLink")) {
+			SharedPreferences settings = cordova.getActivity().getSharedPreferences("org.hotshare.everywhere.deeplink", 0);
+			SharedPreferences.Editor editor = settings.edit();
+			editor.putString("deeplink", null);
 			editor.commit();
 			callbackContext.success("success");
 			return true;
